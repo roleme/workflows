@@ -1,0 +1,67 @@
+name: Dependabot auto-merge (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      validate-command:
+        description: Shell command to run as the validation step before merging
+        required: false
+        type: string
+        default: "echo 'no validation configured'"
+      merge-target:
+        description: Semver level to auto-merge (patch or minor)
+        required: false
+        type: string
+        default: patch
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run validation
+        run: ${{ inputs.validate-command }}
+
+  auto-merge:
+    name: Auto-merge
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-merge patch updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        uses: fastify/github-action-merge-dependabot@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          target: ${{ inputs.merge-target }}
+          merge-method: squash
+
+      - name: Approve only for major/minor updates
+        if: steps.metadata.outputs.update-type != 'version-update:semver-patch'
+        uses: fastify/github-action-merge-dependabot@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          target: major
+          merge-method: squash
+          approve-only: true
+
+      - name: Comment on major/minor updates
+        if: steps.metadata.outputs.update-type != 'version-update:semver-patch'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEP_NAMES: ${{ steps.metadata.outputs.dependency-names }}
+        run: |
+          gh pr comment "$PR_URL" --body "**${UPDATE_TYPE} detected** for \`${DEP_NAMES}\` — validate passed but merge requires manual review. Check the changelog for breaking changes before merging."
