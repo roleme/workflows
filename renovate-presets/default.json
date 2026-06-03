@@ -1,0 +1,7 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Shared Renovate base preset for roleme repos. Edit here to change behavior everywhere. Repos reference it via extends: github>roleme/workflows//renovate-presets/default.json",
+  "extends": ["config:recommended"],
+  "minimumReleaseAge": "10 days",
+  "labels": ["dependencies", "renovate"]
+}
