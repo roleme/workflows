@@ -23,7 +23,7 @@ jobs:
     name: Validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Run validation
         # Pass the caller-supplied command via env so it is set as a string
@@ -43,13 +43,13 @@ jobs:
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v3
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Auto-merge patch updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
-        uses: fastify/github-action-merge-dependabot@v3
+        uses: fastify/github-action-merge-dependabot@30c3f8f14a4f7b315ba38dbc1b793d27128fef82 # v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           target: ${{ inputs.merge-target }}
@@ -57,7 +57,7 @@ jobs:
 
       - name: Approve only for major/minor updates
         if: steps.metadata.outputs.update-type != 'version-update:semver-patch'
-        uses: fastify/github-action-merge-dependabot@v3
+        uses: fastify/github-action-merge-dependabot@30c3f8f14a4f7b315ba38dbc1b793d27128fef82 # v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           target: major
