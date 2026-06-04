@@ -26,7 +26,15 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Run validation
-        run: ${{ inputs.validate-command }}
+        # Pass the caller-supplied command via env so it is set as a string
+        # value, never spliced into the script text. Interpolating
+        # ${{ inputs.validate-command }} directly into run: would allow a
+        # calling repo to inject arbitrary code into this write-capable,
+        # auto-merging reusable workflow.
+        env:
+          VALIDATE_COMMAND: ${{ inputs.validate-command }}
+        run: |
+          bash -c "$VALIDATE_COMMAND"
 
   auto-merge:
     name: Auto-merge
