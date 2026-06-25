@@ -1,0 +1,109 @@
+# Reusable: build a Docker image, push it to GHCR, and trigger an instant
+# Komodo deploy. Used by the bot repos (asia-trip-bot, kurwa_bot).
+#
+# Each caller keeps its own `on: push` trigger with a repo-specific `paths:`
+# filter (the set of source paths that should rebuild the image), then
+# delegates here:
+#
+#   jobs:
+#     publish:
+#       uses: roleme/workflows/.github/workflows/docker-publish-reusable.yml@main
+#       permissions:
+#         contents: read
+#         packages: write
+#       with:
+#         image: ghcr.io/<owner>/<repo>
+#         komodo-stack: <stack-name>
+#         komodo-host: <komodo-host>
+#       secrets: inherit
+#
+# Deploy trigger: after the GHCR push, the final step curls Komodo's per-stack
+# GitHub listener, HMAC-signing the body with KOMODO_WEBHOOK_SECRET (the
+# stack's webhook_secret). Stacks have webhook_force_deploy=true so Komodo runs
+# a real DeployStack (pull) — a new :latest leaves compose.yaml unchanged, so
+# DeployStackIfChanged would no-op. Without this step the stack still updates
+# via Komodo's poll; the webhook just makes it near-instant.
+name: docker-publish (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Fully-qualified GHCR image name (e.g. ghcr.io/owner/repo)
+        required: true
+        type: string
+      komodo-stack:
+        description: Komodo stack name for the deploy listener URL
+        required: true
+        type: string
+      komodo-host:
+        description: Komodo host for the deploy listener (e.g. komodo.example.com)
+        required: true
+        type: string
+      context:
+        description: Docker build context
+        required: false
+        type: string
+        default: .
+    secrets:
+      KOMODO_WEBHOOK_SECRET:
+        description: HMAC secret for the Komodo stack webhook
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata (tags + labels)
+        id: meta
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6
+        with:
+          images: ${{ inputs.image }}
+          tags: |
+            type=raw,value=latest
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
+
+      - name: Build and push
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7
+        with:
+          context: ${{ inputs.context }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trigger Komodo deploy
+        # All interpolated values come from workflow inputs/secrets (trusted
+        # caller config, not event payload). They are passed via env and quoted
+        # so they are never spliced into the command line.
+        env:
+          KOMODO_WEBHOOK_SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
+          KOMODO_HOST: ${{ inputs.komodo-host }}
+          KOMODO_STACK: ${{ inputs.komodo-stack }}
+        run: |
+          BODY='{"ref":"refs/heads/main"}'
+          SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$KOMODO_WEBHOOK_SECRET" | awk '{print $2}')"
+          curl -fsSL -X POST \
+            "https://${KOMODO_HOST}/listener/github/stack/${KOMODO_STACK}/deploy" \
+            -H "Content-Type: application/json" \
+            -H "X-Hub-Signature-256: $SIG" \
+            --data "$BODY"

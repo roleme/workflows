@@ -4,5 +4,13 @@
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "minimumReleaseAge": "10 days",
   "transitiveRemediation": true,
-  "labels": ["dependencies", "renovate"]
+  "labels": ["dependencies", "renovate"],
+  "packageRules": [
+    {
+      "description": "GitHub Actions patch/minor — automerge. Renovate is the primary updater for actions (Dependabot is only a backup); the 10-day minimumReleaseAge above still applies before the merge.",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ]
 }
