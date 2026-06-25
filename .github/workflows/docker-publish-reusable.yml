@@ -14,6 +14,7 @@
 #       with:
 #         image: ghcr.io/<owner>/<repo>
 #         komodo-stack: <stack-name>
+#         komodo-host: <komodo-host>
 #       secrets: inherit
 #
 # Deploy trigger: after the GHCR push, the final step curls Komodo's per-stack
@@ -36,10 +37,9 @@ on:
         required: true
         type: string
       komodo-host:
-        description: Komodo host for the deploy listener
-        required: false
+        description: Komodo host for the deploy listener (e.g. komodo.example.com)
+        required: true
         type: string
-        default: komo.domovas.uk
       context:
         description: Docker build context
         required: false
