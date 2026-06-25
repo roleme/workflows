@@ -1,0 +1,32 @@
+# Composite action: run the privacy scan as a STEP inside any job, e.g. at the
+# end of a lint job, without spinning up a separate job. Same rules as the
+# privacy-scan reusable workflow (both run scripts/privacy-scan.sh).
+#
+#   - uses: roleme/workflows/privacy-scan@<sha>
+#     with:
+#       extra-patterns: |
+#         example-private-host\.example
+#
+# Private hostnames are passed by the caller via extra-patterns and never
+# hardcoded in this public repo.
+name: privacy-scan
+description: Fail if tracked files contain private-infrastructure markers.
+
+inputs:
+  extra-patterns:
+    description: Newline-separated extended-regexps of extra strings to flag (e.g. private hostnames)
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Run privacy scan
+      shell: bash
+      # extra-patterns is action input (trusted caller config); pass via quoted
+      # env so it is never spliced into the command line. ${{ github.action_path }}
+      # points at this action's checked-out dir, so the script is always the one
+      # shipped with the pinned action ref — not the caller's tree.
+      env:
+        EXTRA_PATTERNS: ${{ inputs.extra-patterns }}
+      run: bash "${{ github.action_path }}/privacy-scan.sh"
