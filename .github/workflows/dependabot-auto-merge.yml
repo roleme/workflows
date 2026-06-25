@@ -27,6 +27,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
       - name: Run validation
         # Pass the caller-supplied command via env so it is set as a string
         # value, never spliced into the script text. Interpolating
