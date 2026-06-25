@@ -1,11 +1,11 @@
-# Reusable privacy scan: fails if tracked files contain private-infrastructure
-# markers (private IPs, .local hosts, host paths, key/secret markers, plus any
-# caller-supplied hostnames). Runs scripts/privacy-scan.sh from this repo.
+# Reusable privacy scan (job-level wrapper): fails if tracked files contain
+# private-infrastructure markers. Thin wrapper around the privacy-scan composite
+# action — use this when you want a standalone job; use the action directly
+# (roleme/workflows/privacy-scan@<sha>) to run it as a step inside an existing job.
 #
-# Callers delegate here and pass their own private hostnames via extra-patterns
-# (newline-separated extended-regexps). Those patterns stay in the caller's
-# (private) repo and run in the caller's (private) Actions context — they are
-# NOT hardcoded in this public repo:
+# Callers pass their own private hostnames via extra-patterns (newline-separated
+# extended-regexps). Those patterns stay in the caller's (private) repo and run
+# in the caller's Actions context — never hardcoded in this public repo:
 #
 #   jobs:
 #     privacy-scan:
@@ -31,19 +31,16 @@ jobs:
   privacy-scan:
     runs-on: ubuntu-latest
     steps:
-      # The caller's own code is checked out (default), but the scan SCRIPT must
-      # come from this workflows repo. Fetch it explicitly so the rules cannot
-      # be tampered with by the calling repo's working tree.
       - name: Checkout caller repo
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
 
-      - name: Fetch scan script from workflows repo
-        # job.workflow_repository + job.workflow_sha resolve to THIS reusable
-        # workflow's repo at the exact commit the caller pinned — so the scan
-        # rules cannot be swapped by the calling repo's working tree, and a
-        # caller pinned to an older SHA gets that SHA's script (not main).
+      # Fetch the composite action (which carries the scan script) from THIS
+      # repo at the pinned commit, so the rules cannot be swapped by the
+      # caller's working tree. uses: cannot take an expression ref, so we
+      # check the action dir out by job.workflow_sha and invoke its script.
+      - name: Fetch scan tooling from workflows repo
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           repository: ${{ job.workflow_repository }}
@@ -56,4 +53,4 @@ jobs:
         # env and quote it so it is never spliced into the command line.
         env:
           EXTRA_PATTERNS: ${{ inputs.extra-patterns }}
-        run: bash .privacy-scan-tools/scripts/privacy-scan.sh
+        run: bash .privacy-scan-tools/privacy-scan/privacy-scan.sh
