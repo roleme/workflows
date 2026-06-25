@@ -1,0 +1,22 @@
+# Lets repos use this script as a local pre-commit hook via the pre-commit
+# framework. In a consuming repo's .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/roleme/workflows
+#       rev: <sha-or-tag>
+#       hooks:
+#         - id: privacy-scan
+#           # private hostnames stay in the consuming repo's config, not here:
+#           args: ["--"]
+#           # pass extra patterns via env in the hook invocation, e.g.:
+#           #   EXTRA_PATTERNS=$'domovas\\.uk' git commit ...
+#
+# The scan reads EXTRA_PATTERNS from the environment (same as CI), so private
+# hostnames are supplied by the developer/repo, never stored in this public repo.
+- id: privacy-scan
+  name: privacy scan (private-infra markers)
+  description: Fail the commit if tracked files contain private-infrastructure markers.
+  entry: scripts/privacy-scan.sh
+  language: script
+  pass_filenames: false
+  always_run: true
