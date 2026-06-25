@@ -3,5 +3,6 @@
   "description": "Shared Renovate base preset for roleme repos. Edit here to change behavior everywhere. Repos reference it via extends: github>roleme/workflows//renovate-presets/default.json",
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "minimumReleaseAge": "10 days",
+  "transitiveRemediation": true,
   "labels": ["dependencies", "renovate"]
 }
