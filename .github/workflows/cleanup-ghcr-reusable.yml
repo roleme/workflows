@@ -1,0 +1,43 @@
+# Reusable: prune untagged GHCR container versions for a package, keeping the
+# most recent N. Callers add a thin wrapper with their own schedule:
+#
+#   on:
+#     schedule:
+#       - cron: '0 4 * * 0'
+#     workflow_dispatch: {}
+#   jobs:
+#     cleanup:
+#       uses: roleme/workflows/.github/workflows/cleanup-ghcr-reusable.yml@<sha>
+#       permissions:
+#         packages: write
+#       with:
+#         package-name: my-image
+name: cleanup-ghcr (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      package-name:
+        description: GHCR container package name to prune
+        required: true
+        type: string
+      min-versions-to-keep:
+        description: Number of most-recent versions to retain
+        required: false
+        type: number
+        default: 5
+
+permissions:
+  packages: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete untagged versions
+        uses: actions/delete-package-versions@e5bc658cc4c965c472efe991f8beea3981499c55 # v5.0.0
+        with:
+          package-name: ${{ inputs.package-name }}
+          package-type: 'container'
+          min-versions-to-keep: ${{ inputs.min-versions-to-keep }}
+          delete-only-untagged-versions: 'true'
