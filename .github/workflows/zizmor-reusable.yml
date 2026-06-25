@@ -1,0 +1,31 @@
+# Reusable zizmor (GitHub Actions security) scan.
+#
+# Callers add a thin wrapper that triggers on pull_request touching
+# .github/workflows/** and delegates here:
+#
+#   jobs:
+#     zizmor:
+#       uses: roleme/workflows/.github/workflows/zizmor-reusable.yml@main
+#
+# advanced-security: false surfaces results as workflow annotations (not a
+# SARIF upload), so no security-events permission is needed — contents: read
+# is enough.
+name: zizmor (reusable)
+
+on:
+  workflow_call: {}
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        with:
+          advanced-security: false
