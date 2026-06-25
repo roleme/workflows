@@ -1,0 +1,44 @@
+# Composite action: trigger a Komodo stack deploy by calling its per-stack
+# GitHub listener, HMAC-signing the body with the stack's webhook secret. Drop
+# it in as a STEP after a build/push:
+#
+#   - uses: roleme/workflows/komodo-deploy@<sha>
+#     with:
+#       host: ${{ vars.KOMODO_HOST }}
+#       stack: my-stack
+#       webhook-secret: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
+#
+# No host is hardcoded here (public repo) — the caller supplies host/stack/secret.
+name: komodo-deploy
+description: Trigger an instant Komodo stack deploy via its HMAC-signed webhook listener.
+
+inputs:
+  host:
+    description: Komodo host (e.g. komodo.example.com), no scheme
+    required: true
+  stack:
+    description: Komodo stack name
+    required: true
+  webhook-secret:
+    description: The stack's webhook_secret used to HMAC-sign the request
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Trigger Komodo deploy
+      shell: bash
+      # All values come from action inputs (trusted caller config / secrets),
+      # passed via quoted env so they are never spliced into the command line.
+      env:
+        KOMODO_HOST: ${{ inputs.host }}
+        KOMODO_STACK: ${{ inputs.stack }}
+        KOMODO_WEBHOOK_SECRET: ${{ inputs.webhook-secret }}
+      run: |
+        BODY='{"ref":"refs/heads/main"}'
+        SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$KOMODO_WEBHOOK_SECRET" | awk '{print $2}')"
+        curl -fsSL -X POST \
+          "https://${KOMODO_HOST}/listener/github/stack/${KOMODO_STACK}/deploy" \
+          -H "Content-Type: application/json" \
+          -H "X-Hub-Signature-256: $SIG" \
+          --data "$BODY"

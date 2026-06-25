@@ -16,7 +16,7 @@
 - id: privacy-scan
   name: privacy scan (private-infra markers)
   description: Fail the commit if tracked files contain private-infrastructure markers.
-  entry: scripts/privacy-scan.sh
+  entry: privacy-scan/privacy-scan.sh
   language: script
   pass_filenames: false
   always_run: true
