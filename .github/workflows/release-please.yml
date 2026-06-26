@@ -83,11 +83,22 @@ jobs:
         run: |
           set -euo pipefail
           ref="tags/v${MAJOR}"
-          # Update the ref if it exists, otherwise create it.
-          if gh api "repos/${REPO}/git/refs/${ref}" >/dev/null 2>&1; then
-            gh api -X PATCH "repos/${REPO}/git/refs/${ref}" -F sha="${SHA}" -F force=true >/dev/null
-            echo "Moved tag v${MAJOR} -> ${SHA}"
-          else
-            gh api -X POST "repos/${REPO}/git/refs" -f ref="refs/tags/v${MAJOR}" -f sha="${SHA}" >/dev/null
-            echo "Created tag v${MAJOR} -> ${SHA}"
-          fi
+          move_tag() {
+            # Update the ref if it exists, otherwise create it.
+            if gh api "repos/${REPO}/git/refs/${ref}" >/dev/null 2>&1; then
+              gh api -X PATCH "repos/${REPO}/git/refs/${ref}" -F sha="${SHA}" -F force=true >/dev/null
+              echo "Moved tag v${MAJOR} -> ${SHA}"
+            else
+              gh api -X POST "repos/${REPO}/git/refs" -f ref="refs/tags/v${MAJOR}" -f sha="${SHA}" >/dev/null
+              echo "Created tag v${MAJOR} -> ${SHA}"
+            fi
+          }
+          # The release commit can briefly 422 ("Reference does not exist") right
+          # after the release PR merges (object not yet ref-able), so retry.
+          for attempt in 1 2 3 4 5; do
+            if move_tag; then exit 0; fi
+            echo "tag move attempt ${attempt} failed; retrying in 5s"
+            sleep 5
+          done
+          echo "::error::failed to move major tag v${MAJOR} after retries"
+          exit 1
