@@ -11,6 +11,23 @@
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
+    },
+    {
+      "description": "Our own shared reusables (roleme/workflows) — no soak, auto-merge non-major on green. We control this repo and it is released via release-please (patch/minor verified by its own CI before the tag is cut), so consumers should pick up new versions immediately and let their own required checks be the gate. Major bumps fall through to the rule below and stay manual.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["roleme/workflows"],
+      "matchUpdateTypes": ["patch", "minor", "pin", "digest", "pinDigest"],
+      "minimumReleaseAge": "0",
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "roleme/workflows major bumps — never automerge (breaking change in shared CI). Pin to the new vN by hand after reviewing the changelog.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["roleme/workflows"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "renovate", "breaking-change"]
     }
   ]
 }
