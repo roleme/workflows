@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/roleme/workflows/compare/v1.1.0...v1.1.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* retry major-tag move to survive transient 422 after release merge ([#24](https://github.com/roleme/workflows/issues/24)) ([59d6199](https://github.com/roleme/workflows/commit/59d619994fe3e67aa84077849615e282aa0d4065))
+
 ## [1.1.0](https://github.com/roleme/workflows/compare/v1.0.0...v1.1.0) (2026-06-26)
 
 
