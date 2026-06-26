@@ -25,6 +25,11 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
+          # A PAT (not the default GITHUB_TOKEN) so the release PR it opens
+          # triggers pull_request workflows — the required `zizmor` check only
+          # runs on PRs, and a PR opened by GITHUB_TOKEN does not trigger it,
+          # which would deadlock the required-check gate.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
@@ -35,7 +40,9 @@ jobs:
       - name: Enable auto-merge for non-major release PRs
         if: ${{ steps.release.outputs.prs_created == 'true' }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Same PAT as above so enabling auto-merge is attributed consistently
+          # and has pull-request write on this repo.
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           PRS: ${{ steps.release.outputs.prs }}
         run: |
           set -euo pipefail
