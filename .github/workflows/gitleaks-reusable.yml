@@ -5,10 +5,11 @@
 #       uses: roleme/workflows/.github/workflows/gitleaks-reusable.yml@<sha>
 #
 # fetch-depth: 0 lets gitleaks scan full history, not just the tip.
-# PR commenting is disabled so the job needs only contents: read — otherwise
-# gitleaks-action tries to POST a PR comment and fails on pull_request events
-# with "Resource not accessible by integration" unless granted
-# pull-requests: write. The job summary still surfaces any findings.
+# PR commenting is disabled (GITLEAKS_ENABLE_COMMENTS=false) so we don't need
+# pull-requests: write. But on pull_request events gitleaks-action still calls
+# GET /pulls/{n}/commits to scan only the PR's commits, which needs
+# pull-requests: read — without it the run fails "Resource not accessible by
+# integration". Findings surface via the job summary + SARIF artifact.
 name: gitleaks (reusable)
 
 on:
@@ -16,6 +17,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   scan:
