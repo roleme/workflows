@@ -1,9 +1,10 @@
 name: zizmor (Actions security)
 
 on:
+  # Runs on every PR (not just workflow changes) so it is a dependable required
+  # status check: the release-please PR edits only the manifest/CHANGELOG, and a
+  # path-filtered required check would never report and would deadlock that PR.
   pull_request:
-    paths:
-      - '.github/workflows/**'
 
 # Least privilege: zizmor only reads the repo. advanced-security: false means
 # results are surfaced as workflow annotations (not SARIF upload), so no

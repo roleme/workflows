@@ -1,0 +1,77 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+# release-please opens/maintains a release PR and, when that PR merges, cuts a
+# git tag. Consumers (docker_infra, asia-trip-bot, training_tracker) pin the
+# reusables to a SHA with a `# vX.Y.Z` comment; Renovate then tracks that tag.
+permissions:
+  contents: write
+  pull-requests: write
+
+# Never run two release passes at once (a fast second push could race the
+# tag-move / auto-merge steps below).
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # ----- when a release PR is OPEN/UPDATED: auto-merge non-major bumps -----
+      # release-please re-runs this job whenever it opens or updates the release
+      # PR. patch/minor bumps merge themselves once branch-protection checks
+      # (zizmor) go green; a major bump (X.0.0) is left open for manual review.
+      - name: Enable auto-merge for non-major release PRs
+        if: ${{ steps.release.outputs.prs_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRS: ${{ steps.release.outputs.prs }}
+        run: |
+          set -euo pipefail
+          # outputs.prs is a JSON array of {number, ...}; outputs.prs_created is
+          # set, but the per-version flag lives in the PR title / labels.
+          echo "$PRS" | jq -c '.[]' | while read -r pr; do
+            number=$(echo "$pr" | jq -r '.number')
+            # The release PR title is e.g. "chore(main): release 1.2.3".
+            version=$(gh pr view "$number" --json title --jq '.title' \
+              | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
+            if [ -z "$version" ]; then
+              echo "PR #$number: could not parse version, leaving for manual review"
+              continue
+            fi
+            major=${version%%.*}
+            minorpatch=${version#*.}
+            # A major bump is X.0.0 — leave it open for manual approval.
+            if [ "$minorpatch" = "0.0" ]; then
+              echo "PR #$number ($version): MAJOR bump — manual review required"
+            else
+              echo "PR #$number ($version): non-major — enabling auto-merge"
+              gh pr merge "$number" --auto --squash
+            fi
+          done
+
+      # ----- after a release is CUT: move the major tag (v1) to it -----
+      - name: Move major tag to the new release
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          MAJOR: ${{ steps.release.outputs.major }}
+          SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Force-move the moving major tag (e.g. v1) to the released commit so
+          # consumers who choose to track @v1 follow non-breaking releases.
+          git tag -fa "v${MAJOR}" "${SHA}" -m "Release v${MAJOR} -> ${SHA}"
+          git push origin "v${MAJOR}" --force
