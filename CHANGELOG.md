@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/roleme/workflows/compare/v1.1.1...v1.2.0) (2026-06-29)
+
+
+### Features
+
+* **renovate:** automerge patch+minor for all managers on green CI ([#27](https://github.com/roleme/workflows/issues/27)) ([6a6dbb4](https://github.com/roleme/workflows/commit/6a6dbb401aeda40646ad84622fba13cf8d24531f))
+
 ## [1.1.1](https://github.com/roleme/workflows/compare/v1.1.0...v1.1.1) (2026-06-26)
 
 
