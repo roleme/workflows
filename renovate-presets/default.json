@@ -5,10 +5,13 @@
   "minimumReleaseAge": "10 days",
   "transitiveRemediation": true,
   "labels": ["dependencies", "renovate"],
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": false,
+  "ignoreTests": false,
   "packageRules": [
     {
-      "description": "GitHub Actions patch/minor — automerge. Renovate is the primary updater for actions (Dependabot is only a backup); the 10-day minimumReleaseAge above still applies before the merge.",
-      "matchManagers": ["github-actions"],
+      "description": "Default for ALL managers (npm, pip, docker, github-actions): automerge patch+minor once the PR's CI is green. platformAutomerge=false means Renovate itself merges on a later run after it detects green checks (these repos have no branch protection / required-status-checks, so platform automerge could merge on red — Renovate-side automerge is the real gate). The 10-day minimumReleaseAge soak above still applies before any merge. Majors fall through to the rule below and stay manual; per-repo renovate.json rules (DBs, React major, etc.) are evaluated after this and override it.",
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
     },
