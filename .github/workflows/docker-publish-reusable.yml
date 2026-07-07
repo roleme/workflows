@@ -92,18 +92,11 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Trigger Komodo deploy
-        # All interpolated values come from workflow inputs/secrets (trusted
-        # caller config, not event payload). They are passed via env and quoted
-        # so they are never spliced into the command line.
-        env:
-          KOMODO_WEBHOOK_SECRET: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
-          KOMODO_HOST: ${{ inputs.komodo-host }}
-          KOMODO_STACK: ${{ inputs.komodo-stack }}
-        run: |
-          BODY='{"ref":"refs/heads/main"}'
-          SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$KOMODO_WEBHOOK_SECRET" | awk '{print $2}')"
-          curl -fsSL -X POST \
-            "https://${KOMODO_HOST}/listener/github/stack/${KOMODO_STACK}/deploy" \
-            -H "Content-Type: application/json" \
-            -H "X-Hub-Signature-256: $SIG" \
-            --data "$BODY"
+        # Same-repo composite action, referenced fully-qualified (a local
+        # `./komodo-deploy` path would resolve against the CALLER's checkout, not
+        # this repo). Pinned to the current release SHA.
+        uses: roleme/workflows/komodo-deploy@d80260793c1be1e7debcc016a14995d2fbca8466 # v1.2.0
+        with:
+          host: ${{ inputs.komodo-host }}
+          stack: ${{ inputs.komodo-stack }}
+          webhook-secret: ${{ secrets.KOMODO_WEBHOOK_SECRET }}
