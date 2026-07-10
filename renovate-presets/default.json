@@ -8,6 +8,8 @@
   "automergeType": "pr",
   "automergeStrategy": "squash",
   "platformAutomerge": false,
+  "semanticCommits": "enabled",
+  "semanticCommitType": "fix",
   "ignoreTests": false,
   "packageRules": [
     {
