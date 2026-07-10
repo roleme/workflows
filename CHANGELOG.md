@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/roleme/workflows/compare/v1.2.0...v1.3.0) (2026-07-10)
+
+
+### Features
+
+* release on Renovate dependency updates ([#35](https://github.com/roleme/workflows/issues/35)) ([15ad824](https://github.com/roleme/workflows/commit/15ad824164c16d0272e2e6e82a1d49379d258849))
+
 ## [1.2.0](https://github.com/roleme/workflows/compare/v1.1.1...v1.2.0) (2026-06-29)
 
 
