@@ -13,6 +13,11 @@
   "ignoreTests": false,
   "packageRules": [
     {
+      "description": "Major dependency updates carry a BREAKING CHANGE footer so release-please cuts a MAJOR release of this shared repo. Consumers gate roleme/workflows majors manually (see the major rule below), so a possibly-spurious major is a one-click merge there, never a silent rollout. Non-major updates inherit semanticCommitType=fix -> patch.",
+      "matchUpdateTypes": ["major"],
+      "commitBody": "BREAKING CHANGE: major version bump of a dependency; review consumer compatibility."
+    },
+    {
       "description": "Default for ALL managers (npm, pip, docker, github-actions): automerge patch+minor once the PR's CI is green. platformAutomerge=false means Renovate itself merges on a later run after it detects green checks (these repos have no branch protection / required-status-checks, so platform automerge could merge on red — Renovate-side automerge is the real gate). The 10-day minimumReleaseAge soak above still applies before any merge. Majors fall through to the rule below and stay manual; per-repo renovate.json rules (DBs, React major, etc.) are evaluated after this and override it.",
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
