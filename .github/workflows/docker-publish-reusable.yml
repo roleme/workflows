@@ -45,6 +45,15 @@ on:
         required: false
         type: string
         default: .
+      extra-tags:
+        description: |
+          Extra docker/metadata-action tag lines to append (newline-separated),
+          in addition to the always-applied `type=raw,value=latest`. Use to
+          mirror an upstream base version, e.g.
+          `type=raw,value=1.0.1369_30-05-2026`.
+        required: false
+        type: string
+        default: ""
     secrets:
       KOMODO_WEBHOOK_SECRET:
         description: HMAC secret for the Komodo stack webhook
@@ -59,7 +68,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
@@ -77,6 +86,7 @@ jobs:
           images: ${{ inputs.image }}
           tags: |
             type=raw,value=latest
+            ${{ inputs.extra-tags }}
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
