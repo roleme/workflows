@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/roleme/workflows/compare/v1.3.0...v1.4.0) (2026-07-25)
+
+
+### Features
+
+* add optional extra-tags input to docker-publish-reusable ([#41](https://github.com/roleme/workflows/issues/41)) ([3cb8c21](https://github.com/roleme/workflows/commit/3cb8c21f0590323eb685641042842ab7be2fe648))
+
 ## [1.3.0](https://github.com/roleme/workflows/compare/v1.2.0...v1.3.0) (2026-07-10)
 
 
