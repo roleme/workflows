@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/roleme/workflows/compare/v1.4.0...v2.0.0) (2026-08-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** major version bump of a dependency; review consumer compatibility.
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v7 ([#40](https://github.com/roleme/workflows/issues/40)) ([93f3c31](https://github.com/roleme/workflows/commit/93f3c31940225bbb697dd4f49c430d88a90a1c40))
+
 ## [1.4.0](https://github.com/roleme/workflows/compare/v1.3.0...v1.4.0) (2026-07-25)
 
 
