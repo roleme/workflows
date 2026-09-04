@@ -1,0 +1,81 @@
+# Reusable Python lint + test gate (ruff + pytest).
+#
+# Consumers delegate here instead of inlining `actions/*` steps, so the
+# checkout/setup-python hash pins live in this repo only and a drifted pin is
+# fixed once, here, rather than in every repo's ci.yml.
+#
+#   jobs:
+#     lint-and-test:
+#       uses: roleme/workflows/.github/workflows/python-ci-reusable.yml@<sha>
+#       with:
+#         lint-paths: "src/ healthcheck.py tests/"
+#         editable-install: true
+#
+# Caller-supplied strings reach `run:` via env, never inline ${{ }}: splicing
+# them straight into a shell line would be a command-injection seam even though
+# callers are trusted.
+name: python-ci (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version-file:
+        description: File to read the Python version from
+        required: false
+        type: string
+        default: .python-version
+      requirements:
+        description: Space-separated requirements files, each passed to pip as -r
+        required: false
+        type: string
+        default: requirements.txt requirements-dev.txt
+      editable-install:
+        description: Also run `pip install --no-deps -e .` (packaged repos)
+        required: false
+        type: boolean
+        default: false
+      lint-paths:
+        description: Paths passed to `ruff check`
+        required: false
+        type: string
+        default: "."
+      test-paths:
+        description: Paths passed to `pytest`
+        required: false
+        type: string
+        default: tests/
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version-file: ${{ inputs.python-version-file }}
+          cache: "pip"
+      - name: Install dependencies
+        env:
+          REQUIREMENTS: ${{ inputs.requirements }}
+        run: |
+          args=""
+          for f in $REQUIREMENTS; do
+            args="$args -r $f"
+          done
+          pip install $args
+      - name: Editable install
+        if: inputs.editable-install
+        run: pip install --no-deps -e .
+      - name: Ruff
+        env:
+          LINT_PATHS: ${{ inputs.lint-paths }}
+        run: ruff check $LINT_PATHS
+      - name: Pytest
+        env:
+          TEST_PATHS: ${{ inputs.test-paths }}
+        run: pytest $TEST_PATHS
