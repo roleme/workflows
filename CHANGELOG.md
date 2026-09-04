@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/roleme/workflows/compare/v2.0.0...v2.1.0) (2026-09-04)
+
+
+### Features
+
+* add python-ci reusable (ruff + pytest) ([#56](https://github.com/roleme/workflows/issues/56)) ([4c3f573](https://github.com/roleme/workflows/commit/4c3f5739b3fe0f5b0f7079c60a82c485084c32c2))
+
 ## [2.0.0](https://github.com/roleme/workflows/compare/v1.4.0...v2.0.0) (2026-08-12)
 
 
