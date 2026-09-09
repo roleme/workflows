@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/roleme/workflows/compare/v2.2.0...v2.3.0) (2026-09-09)
+
+
+### Features
+
+* **renovate:** dependency majors cut a minor, not a major ([#61](https://github.com/roleme/workflows/issues/61)) ([16eac1e](https://github.com/roleme/workflows/commit/16eac1ea7698dee6f12152c11795985bf8838c8c))
+
 ## [2.2.0](https://github.com/roleme/workflows/compare/v2.1.0...v2.2.0) (2026-09-09)
 
 
