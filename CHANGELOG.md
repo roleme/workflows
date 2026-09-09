@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/roleme/workflows/compare/v2.1.0...v2.2.0) (2026-09-09)
+
+
+### Features
+
+* **renovate:** automerge self-reference bumps without soak ([#59](https://github.com/roleme/workflows/issues/59)) ([1356380](https://github.com/roleme/workflows/commit/13563802584cd2834fe263927382488f4efb9a94))
+
 ## [2.1.0](https://github.com/roleme/workflows/compare/v2.0.0...v2.1.0) (2026-09-04)
 
 
