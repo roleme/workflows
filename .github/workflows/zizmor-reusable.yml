@@ -5,7 +5,7 @@
 #
 #   jobs:
 #     zizmor:
-#       uses: roleme/workflows/.github/workflows/zizmor-reusable.yml@main
+#       uses: roleme/workflows/.github/workflows/zizmor-reusable.yml@<sha>
 #
 # advanced-security: false surfaces results as workflow annotations (not a
 # SARIF upload), so no security-events permission is needed — contents: read

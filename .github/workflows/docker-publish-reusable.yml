@@ -7,7 +7,7 @@
 #
 #   jobs:
 #     publish:
-#       uses: roleme/workflows/.github/workflows/docker-publish-reusable.yml@main
+#       uses: roleme/workflows/.github/workflows/docker-publish-reusable.yml@<sha>
 #       permissions:
 #         contents: read
 #         packages: write

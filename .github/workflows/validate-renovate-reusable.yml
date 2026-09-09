@@ -6,7 +6,7 @@
 #
 #   jobs:
 #     validate-renovate:
-#       uses: roleme/workflows/.github/workflows/validate-renovate-reusable.yml@main
+#       uses: roleme/workflows/.github/workflows/validate-renovate-reusable.yml@<sha>
 #
 # Node is required for renovate-config-validator (shipped in the renovate npm
 # package).
