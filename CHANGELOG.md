@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/roleme/workflows/compare/v2.3.0...v2.4.0) (2026-09-09)
+
+
+### Features
+
+* **deps:** update actions/setup-python action to v7 ([#58](https://github.com/roleme/workflows/issues/58)) ([cbf257d](https://github.com/roleme/workflows/commit/cbf257d8146df42b92536ae2ce4518a7f15328e0))
+
 ## [2.3.0](https://github.com/roleme/workflows/compare/v2.2.0...v2.3.0) (2026-09-09)
 
 
