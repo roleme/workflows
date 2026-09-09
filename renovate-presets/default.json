@@ -19,14 +19,14 @@
   "ignoreTests": false,
   "packageRules": [
     {
-      "description": "Major dependency updates carry a BREAKING CHANGE footer so release-please cuts a MAJOR release of this shared repo. Consumers gate roleme/workflows majors manually (see the major rule below), so a possibly-spurious major is a one-click merge there, never a silent rollout. Non-major updates inherit semanticCommitType=fix -> patch.",
+      "description": "Major dependency updates commit as feat(deps) so release-please cuts a MINOR release of this shared repo. A dependency's own major is a fact about THAT dependency's interface, not ours - our consumers call our reusable workflows, whose inputs/outputs are unchanged by it. A minor keeps the signal that something notable moved without inflating our major. Non-major updates inherit semanticCommitType=fix -> patch. MAJOR is reserved for breaking changes to OUR OWN interface, authored by hand as feat!: / fix!: - see docs/versioning.md.",
       "matchUpdateTypes": [
         "major"
       ],
-      "commitBody": "BREAKING CHANGE: major version bump of a dependency; review consumer compatibility."
+      "semanticCommitType": "feat"
     },
     {
-      "description": "Default for ALL managers (npm, pip, docker, github-actions): automerge patch+minor once the PR's CI is green. platformAutomerge=false means Renovate itself merges on a later run after it detects green checks (these repos have no branch protection / required-status-checks, so platform automerge could merge on red \u2014 Renovate-side automerge is the real gate). The 10-day minimumReleaseAge soak above still applies before any merge. Majors fall through to the rule below and stay manual; per-repo renovate.json rules (DBs, React major, etc.) are evaluated after this and override it.",
+      "description": "Default for ALL managers (npm, pip, docker, github-actions): automerge patch+minor once the PR's CI is green. platformAutomerge=false means Renovate itself merges on a later run after it detects green checks, and ignoreTests=false keeps that gated on green. Consumer repos vary in whether they have required status checks, so Renovate-side automerge is the portable gate rather than relying on platform automerge honouring branch protection. The 10-day minimumReleaseAge soak above still applies before any merge. Majors fall through to the rule below and stay manual; per-repo renovate.json rules (DBs, React major, etc.) are evaluated after this and override it.",
       "matchUpdateTypes": [
         "patch",
         "minor"
