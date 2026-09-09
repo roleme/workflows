@@ -1,10 +1,16 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "Shared Renovate base preset for roleme repos. Edit here to change behavior everywhere. Repos reference it via extends: github>roleme/workflows//renovate-presets/default.json",
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
   "minimumReleaseAge": "10 days",
   "transitiveRemediation": true,
-  "labels": ["dependencies", "renovate"],
+  "labels": [
+    "dependencies",
+    "renovate"
+  ],
   "automergeType": "pr",
   "automergeStrategy": "squash",
   "platformAutomerge": false,
@@ -14,30 +20,75 @@
   "packageRules": [
     {
       "description": "Major dependency updates carry a BREAKING CHANGE footer so release-please cuts a MAJOR release of this shared repo. Consumers gate roleme/workflows majors manually (see the major rule below), so a possibly-spurious major is a one-click merge there, never a silent rollout. Non-major updates inherit semanticCommitType=fix -> patch.",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "commitBody": "BREAKING CHANGE: major version bump of a dependency; review consumer compatibility."
     },
     {
-      "description": "Default for ALL managers (npm, pip, docker, github-actions): automerge patch+minor once the PR's CI is green. platformAutomerge=false means Renovate itself merges on a later run after it detects green checks (these repos have no branch protection / required-status-checks, so platform automerge could merge on red — Renovate-side automerge is the real gate). The 10-day minimumReleaseAge soak above still applies before any merge. Majors fall through to the rule below and stay manual; per-repo renovate.json rules (DBs, React major, etc.) are evaluated after this and override it.",
-      "matchUpdateTypes": ["patch", "minor"],
+      "description": "Default for ALL managers (npm, pip, docker, github-actions): automerge patch+minor once the PR's CI is green. platformAutomerge=false means Renovate itself merges on a later run after it detects green checks (these repos have no branch protection / required-status-checks, so platform automerge could merge on red \u2014 Renovate-side automerge is the real gate). The 10-day minimumReleaseAge soak above still applies before any merge. Majors fall through to the rule below and stay manual; per-repo renovate.json rules (DBs, React major, etc.) are evaluated after this and override it.",
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
       "automerge": true
     },
     {
-      "description": "Our own shared reusables (roleme/workflows) — no soak, auto-merge non-major on green. We control this repo and it is released via release-please (patch/minor verified by its own CI before the tag is cut), so consumers should pick up new versions immediately and let their own required checks be the gate. Major bumps fall through to the rule below and stay manual.",
-      "matchManagers": ["github-actions"],
-      "matchDepNames": ["roleme/workflows"],
-      "matchUpdateTypes": ["patch", "minor", "pin", "digest", "pinDigest"],
+      "description": "Our own shared reusables (roleme/workflows) \u2014 no soak, auto-merge non-major on green. We control this repo and it is released via release-please (patch/minor verified by its own CI before the tag is cut), so consumers should pick up new versions immediately and let their own required checks be the gate. Major bumps fall through to the rule below and stay manual.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "roleme/workflows"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor",
+        "pin",
+        "digest",
+        "pinDigest"
+      ],
       "minimumReleaseAge": "0",
       "automerge": true,
       "automergeType": "pr"
     },
     {
-      "description": "roleme/workflows major bumps — never automerge (breaking change in shared CI). Pin to the new vN by hand after reviewing the changelog.",
-      "matchManagers": ["github-actions"],
-      "matchDepNames": ["roleme/workflows"],
-      "matchUpdateTypes": ["major"],
+      "description": "roleme/workflows major bumps \u2014 never automerge (breaking change in shared CI). Pin to the new vN by hand after reviewing the changelog.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "roleme/workflows"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
-      "labels": ["dependencies", "renovate", "breaking-change"]
+      "labels": [
+        "dependencies",
+        "renovate",
+        "breaking-change"
+      ]
+    },
+    {
+      "description": "Self-reference: inside roleme/workflows itself, same-repo action pins (e.g. komodo-deploy) point at commits already merged and CI-verified in this repo. The vN tag is cut by our own release-please, so a 'major' here is not an unreviewed upstream breaking change - it is our own already-reviewed code. No soak, automerge every update type including major. matchRepositories scopes this to this repo only, so consumers keep the manual-major gate above.",
+      "matchRepositories": [
+        "roleme/workflows"
+      ],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchDepNames": [
+        "roleme/workflows"
+      ],
+      "minimumReleaseAge": "0",
+      "automerge": true,
+      "automergeType": "pr",
+      "labels": [
+        "dependencies",
+        "renovate",
+        "self-reference"
+      ]
     }
   ]
 }
