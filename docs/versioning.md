@@ -67,6 +67,13 @@ survives a squash merge, so this works regardless of the repo's
 also works (this repo is set to `COMMIT_MESSAGES`, so bodies are preserved), but
 the subject form is more robust.
 
-This is a convention, not an enforced rule: `main` requires the `zizmor` status
-check but has no required reviews and no push restrictions, so a `!` commit can
-reach `main` without review. Enforcing it would need a branch-protection change.
+This is enforced by branch protection on `main`:
+
+- a pull request is required (`required_approving_review_count: 0` — a PR must
+  exist, but no approval click is needed)
+- the `zizmor` status check must pass, and the branch must be up to date
+  (`strict: true`)
+- `enforce_admins: true`, so the above applies to admins too
+
+So a `!` commit cannot reach `main` by direct push. Choosing the right bump is
+still a judgement call — protection enforces the PR flow, not the mapping.
