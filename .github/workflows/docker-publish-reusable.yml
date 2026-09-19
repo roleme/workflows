@@ -54,6 +54,17 @@ on:
         required: false
         type: string
         default: ""
+      ref:
+        description: |
+          Commit SHA to build. Empty (the default) builds whatever the event
+          checks out, which is right for `on: push`. A caller triggered by
+          `workflow_run` MUST pass `github.event.workflow_run.head_sha`: that
+          event runs with GITHUB_SHA set to the DEFAULT BRANCH head, so without
+          this the build silently takes a different commit than the one whose
+          checks passed.
+        required: false
+        type: string
+        default: ""
     secrets:
       KOMODO_WEBHOOK_SECRET:
         description: HMAC secret for the Komodo stack webhook
@@ -71,6 +82,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # Empty is checkout's own default: the event's ref.
+          ref: ${{ inputs.ref }}
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -84,6 +97,13 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ inputs.image }}
+          # Only when a ref was pinned. `workflow` (the default) reads the
+          # EVENT, so a pinned build would be labelled with the default-branch
+          # SHA while containing another commit — and that label is how the bot
+          # repos verify a deploy reached prod. `git` reads the checked-out
+          # tree instead. Left as `workflow` otherwise, so an existing caller's
+          # labels do not change with this input unused.
+          context: ${{ inputs.ref != '' && 'git' || 'workflow' }}
           tags: |
             type=raw,value=latest
             ${{ inputs.extra-tags }}
