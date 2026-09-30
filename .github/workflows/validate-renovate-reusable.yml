@@ -20,6 +20,11 @@ on:
         required: false
         type: string
         default: renovate.json
+      strict:
+        description: Validate as repo config and fail on warnings (--no-global --strict)
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -41,4 +46,5 @@ jobs:
         # it via env and quote it so it is never spliced into the command line.
         env:
           CONFIG_FILE: ${{ inputs.config-file }}
-        run: npx --yes --package renovate@43 renovate-config-validator "$CONFIG_FILE"
+          STRICT_FLAGS: ${{ inputs.strict && '--no-global --strict' || '' }}
+        run: npx --yes --package renovate@44 renovate-config-validator $STRICT_FLAGS "$CONFIG_FILE"
