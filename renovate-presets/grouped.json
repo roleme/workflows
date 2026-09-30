@@ -1,0 +1,35 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Opt-in: default.json plus weekly per-ecosystem grouping of non-major updates. Repos reference it via extends: github>roleme/workflows//renovate-presets/grouped.json",
+  "extends": [
+    "github>roleme/workflows//renovate-presets/default.json"
+  ],
+  "rebaseWhen": "conflicted",
+  "packageRules": [
+    {
+      "matchCategories": ["ci"],
+      "matchDepNames": ["!roleme/workflows"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "ci (non-major)",
+      "schedule": ["* 0-3 * * 1"]
+    },
+    {
+      "matchCategories": ["docker"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "docker (non-major)",
+      "schedule": ["* 0-3 * * 1"]
+    },
+    {
+      "matchCategories": ["python"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "python (non-major)",
+      "schedule": ["* 0-3 * * 1"]
+    },
+    {
+      "matchCategories": ["js"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "js (non-major)",
+      "schedule": ["* 0-3 * * 1"]
+    }
+  ]
+}
