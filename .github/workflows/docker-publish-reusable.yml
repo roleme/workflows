@@ -45,6 +45,11 @@ on:
         required: false
         type: string
         default: .
+      dockerfile:
+        description: Dockerfile path; empty uses <context>/Dockerfile
+        required: false
+        type: string
+        default: ""
       extra-tags:
         description: |
           Extra docker/metadata-action tag lines to append (newline-separated),
@@ -95,6 +100,7 @@ jobs:
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
