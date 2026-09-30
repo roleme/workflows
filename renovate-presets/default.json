@@ -6,7 +6,6 @@
     "helpers:pinGitHubActionDigests"
   ],
   "minimumReleaseAge": "10 days",
-  "transitiveRemediation": true,
   "labels": [
     "dependencies",
     "renovate"
