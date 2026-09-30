@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.5.0](https://github.com/roleme/workflows/compare/v2.4.0...v2.5.0) (2026-09-30)
+
+
+### Features
+
+* **docker-publish:** optional dockerfile input ([#76](https://github.com/roleme/workflows/issues/76)) ([2656fe4](https://github.com/roleme/workflows/commit/2656fe459f46e6f8c89836fe58e1666f2b071749))
+* **renovate:** opt-in grouped preset ([#75](https://github.com/roleme/workflows/issues/75)) ([7bdb1ba](https://github.com/roleme/workflows/commit/7bdb1ba1dd27ef9f89985c9c274eb71d32d1d83d))
+* **validate-renovate:** opt-in strict validation, renovate 44 ([#74](https://github.com/roleme/workflows/issues/74)) ([ea18868](https://github.com/roleme/workflows/commit/ea188682e8b8ab8b6a1346df8f5ee8cf604a6728))
+
 ## [2.4.0](https://github.com/roleme/workflows/compare/v2.3.0...v2.4.0) (2026-09-09)
 
 
