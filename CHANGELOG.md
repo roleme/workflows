@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/roleme/workflows/compare/v2.5.0...v2.6.0) (2026-10-28)
+
+
+### Features
+
+* **renovate:** rebase only on conflict ([#83](https://github.com/roleme/workflows/issues/83)) ([02dae5b](https://github.com/roleme/workflows/commit/02dae5b6527ca2a072fe18dae881a3b6c6e125ef))
+
 ## [2.5.0](https://github.com/roleme/workflows/compare/v2.4.0...v2.5.0) (2026-09-30)
 
 
