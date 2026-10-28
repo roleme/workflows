@@ -6,6 +6,7 @@
     "helpers:pinGitHubActionDigests"
   ],
   "minimumReleaseAge": "10 days",
+  "rebaseWhen": "conflicted",
   "labels": [
     "dependencies",
     "renovate"
