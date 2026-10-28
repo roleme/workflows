@@ -1,4 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>roleme/workflows//renovate-presets/default.json"]
+  "extends": ["github>roleme/workflows//renovate-presets/default.json"],
+  "rebaseWhen": "behind-base-branch"
 }
