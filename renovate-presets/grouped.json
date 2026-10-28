@@ -4,7 +4,6 @@
   "extends": [
     "github>roleme/workflows//renovate-presets/default.json"
   ],
-  "rebaseWhen": "conflicted",
   "packageRules": [
     {
       "matchCategories": ["ci"],
