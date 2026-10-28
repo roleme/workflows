@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/roleme/workflows/compare/v2.6.0...v2.7.0) (2026-10-28)
+
+
+### Features
+
+* composite check actions ([#84](https://github.com/roleme/workflows/issues/84)) ([4c313c5](https://github.com/roleme/workflows/commit/4c313c5799b3538b79b06ae35866873c0b0e709d))
+
 ## [2.6.0](https://github.com/roleme/workflows/compare/v2.5.0...v2.6.0) (2026-10-28)
 
 
