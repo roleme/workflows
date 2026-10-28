@@ -28,7 +28,8 @@ Consumers touch exactly three things:
 
 1. The `workflow_call` **inputs, outputs and secrets** of each `*-reusable.yml`
 2. The **inputs and outputs** of each composite action (`komodo-deploy`,
-   `privacy-scan`)
+   `privacy-scan`, `gitleaks`, `zizmor`, `validate-renovate`, `lint-shell`,
+   `lint-docker`, `lint-python`)
 3. **`renovate-presets/default.json`** — anything extending it inherits
    behaviour changes
 

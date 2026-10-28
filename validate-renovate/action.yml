@@ -1,0 +1,49 @@
+name: validate-renovate
+description: Validate the Renovate config when the PR changes it.
+
+inputs:
+  paths:
+    description: Newline-separated git pathspec globs; the check runs only when the PR changes a matching file
+    required: false
+    default: |
+      renovate.json
+      renovate.json5
+      .github/renovate.json
+      .github/renovate.json5
+  base:
+    description: Ref to diff against; defaults to origin/<PR base branch>, and without one the check always runs
+    required: false
+    default: ""
+  force:
+    description: Run even when no matching file changed
+    required: false
+    default: "false"
+  config-file:
+    description: Path to the Renovate config file
+    required: false
+    default: "renovate.json"
+  strict:
+    description: Validate as repo config and fail on warnings
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - id: gate
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+        BASE: ${{ inputs.base }}
+        FORCE: ${{ inputs.force }}
+      run: bash "$GITHUB_ACTION_PATH/../ci/gate.sh"
+    - if: steps.gate.outputs.run == 'true'
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24
+    - if: steps.gate.outputs.run == 'true'
+      shell: bash
+      env:
+        CONFIG_FILE: ${{ inputs.config-file }}
+        STRICT: ${{ inputs.strict }}
+      run: bash "$GITHUB_ACTION_PATH/../.lefthook/pre-push/validate-renovate.sh"
