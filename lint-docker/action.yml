@@ -1,0 +1,44 @@
+name: lint-docker
+description: Run hadolint on the repo's Dockerfiles when the PR changes them.
+
+inputs:
+  paths:
+    description: Newline-separated git pathspec globs; the check runs only when the PR changes a matching file
+    required: false
+    default: |
+      **/Dockerfile
+      **/*.Dockerfile
+      .hadolint.yaml
+  base:
+    description: Ref to diff against; defaults to origin/<PR base branch>, and without one the check always runs
+    required: false
+    default: ""
+  force:
+    description: Run even when no matching file changed
+    required: false
+    default: "false"
+  config:
+    description: Path to the hadolint config, used when it exists
+    required: false
+    default: ".hadolint.yaml"
+  failure-threshold:
+    description: Lowest hadolint severity that fails the check
+    required: false
+    default: "error"
+
+runs:
+  using: composite
+  steps:
+    - id: gate
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+        BASE: ${{ inputs.base }}
+        FORCE: ${{ inputs.force }}
+      run: bash "$GITHUB_ACTION_PATH/../ci/gate.sh"
+    - if: steps.gate.outputs.run == 'true'
+      shell: bash
+      env:
+        CONFIG: ${{ inputs.config }}
+        FAILURE_THRESHOLD: ${{ inputs.failure-threshold }}
+      run: bash "$GITHUB_ACTION_PATH/../.lefthook/pre-push/lint-docker.sh"
