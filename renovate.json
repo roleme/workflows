@@ -1,5 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>roleme/workflows//renovate-presets/default.json"],
-  "rebaseWhen": "behind-base-branch"
+  "rebaseWhen": "behind-base-branch",
+  "customManagers": [
+    {
+      "description": "Tool versions pinned in the check scripts that the composite actions and lefthook run.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.lefthook/.+\\.sh$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z_]+=(?<currentValue>\\S+)"]
+    }
+  ]
 }

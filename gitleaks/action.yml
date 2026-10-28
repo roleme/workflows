@@ -1,0 +1,32 @@
+name: gitleaks
+description: Scan the commits the PR adds for secrets (gitleaks).
+
+inputs:
+  paths:
+    description: Newline-separated git pathspec globs; empty means any change
+    required: false
+    default: ""
+  base:
+    description: Ref to diff against; defaults to origin/<PR base branch>, and without one the check always runs
+    required: false
+    default: ""
+  force:
+    description: Run even when no matching file changed
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - id: gate
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+        BASE: ${{ inputs.base }}
+        FORCE: ${{ inputs.force }}
+      run: bash "$GITHUB_ACTION_PATH/../ci/gate.sh"
+    - if: steps.gate.outputs.run == 'true'
+      shell: bash
+      env:
+        BASE: ${{ inputs.base }}
+      run: bash "$GITHUB_ACTION_PATH/../.lefthook/pre-push/gitleaks.sh"
