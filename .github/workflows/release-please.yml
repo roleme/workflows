@@ -85,11 +85,11 @@ jobs:
           ref="tags/v${MAJOR}"
           move_tag() {
             # Update the ref if it exists, otherwise create it.
-            if gh api "repos/${REPO}/git/refs/${ref}" >/dev/null 2>&1; then
-              gh api -X PATCH "repos/${REPO}/git/refs/${ref}" -F sha="${SHA}" -F force=true >/dev/null
+            if gh api "repos/${REPO}/git/ref/${ref}" >/dev/null 2>&1; then
+              gh api -X PATCH "repos/${REPO}/git/refs/${ref}" -F sha="${SHA}" -F force=true >/dev/null || return 1
               echo "Moved tag v${MAJOR} -> ${SHA}"
             else
-              gh api -X POST "repos/${REPO}/git/refs" -f ref="refs/tags/v${MAJOR}" -f sha="${SHA}" >/dev/null
+              gh api -X POST "repos/${REPO}/git/refs" -f ref="refs/tags/v${MAJOR}" -f sha="${SHA}" >/dev/null || return 1
               echo "Created tag v${MAJOR} -> ${SHA}"
             fi
           }
