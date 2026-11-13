@@ -19,6 +19,13 @@
   "ignoreTests": false,
   "packageRules": [
     {
+      "description": "Every update commits as fix(deps) so release-please cuts a PATCH. config:recommended pulls in :semanticPrefixFixDepsChoreOthers, whose matchPackageNames=* rule sets chore and overrides the top-level semanticCommitType. Majors are raised to feat by the next rule; see docs/versioning.md.",
+      "matchPackageNames": [
+        "*"
+      ],
+      "semanticCommitType": "fix"
+    },
+    {
       "description": "Major dependency updates commit as feat(deps) so release-please cuts a MINOR release of this shared repo. A dependency's own major is a fact about THAT dependency's interface, not ours - our consumers call our reusable workflows, whose inputs/outputs are unchanged by it. A minor keeps the signal that something notable moved without inflating our major. Non-major updates inherit semanticCommitType=fix -> patch. MAJOR is reserved for breaking changes to OUR OWN interface, authored by hand as feat!: / fix!: - see docs/versioning.md.",
       "matchUpdateTypes": [
         "major"
@@ -71,7 +78,7 @@
       ]
     },
     {
-      "description": "Self-reference: inside roleme/workflows itself, same-repo action pins (e.g. komodo-deploy) point at commits already merged and CI-verified in this repo. The vN tag is cut by our own release-please, so a 'major' here is not an unreviewed upstream breaking change - it is our own already-reviewed code. No soak, automerge every update type including major. matchRepositories scopes this to this repo only, so consumers keep the manual-major gate above.",
+      "description": "Self-reference: inside roleme/workflows itself, same-repo action pins (e.g. komodo-deploy) point at commits already merged and CI-verified in this repo. The vN tag is cut by our own release-please, so a 'major' here is not an unreviewed upstream breaking change - it is our own already-reviewed code. No soak, automerge every update type including major. matchRepositories scopes this to this repo only, so consumers keep the manual-major gate above. Commits as chore so retargeting our own pin to a release we just cut does not cut another release, which would loop.",
       "matchRepositories": [
         "roleme/workflows"
       ],
@@ -88,7 +95,8 @@
         "dependencies",
         "renovate",
         "self-reference"
-      ]
+      ],
+      "semanticCommitType": "chore"
     }
   ]
 }

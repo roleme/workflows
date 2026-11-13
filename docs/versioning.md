@@ -11,6 +11,7 @@ Renovate follow new versions, so this repo's version number is a promise about
 | Dependency patch / minor / pin / digest | **patch** |
 | Dependency **major** | **minor** |
 | Breaking change to **our own** interface | **major** |
+| Our own `roleme/workflows` pin inside this repo | no release |
 
 A dependency's major is a fact about *that dependency's* interface. Consumers
 call our reusable workflows, whose inputs and outputs are unchanged by it — so
@@ -19,8 +20,27 @@ that something notable moved without inflating our major version.
 
 Mechanism: Renovate commits non-major updates as `fix(deps):` (patch) and major
 updates as `feat(deps):` (minor), both set in `renovate-presets/default.json`.
-Dependency majors therefore appear under "Features" in `CHANGELOG.md` — a
-cosmetic cost accepted in preference to maintaining custom changelog sections.
+The `fix` type has to be a package rule: `config:recommended` includes
+`:semanticPrefixFixDepsChoreOthers`, whose package rule sets `chore` and would
+otherwise win over the top-level `semanticCommitType`. Dependency majors
+therefore appear under "Features" in `CHANGELOG.md` — a cosmetic cost accepted
+in preference to maintaining custom changelog sections.
+
+Our own pins (`roleme/workflows/komodo-deploy@<sha> # vX.Y.Z`) commit as
+`chore(deps):`. Each release makes Renovate retarget them to the new tag; if
+that bump cut a release, the release would trigger the next bump, forever. The
+pin update ships with the next real release instead.
+
+## Release mechanics
+
+release-please finds the last release from its GitHub release tag and reads
+commits back to that SHA. If `main`'s history is rewritten, re-point every
+`vX.Y.Z` tag at its rewritten commit before the next push, otherwise
+release-please reads the whole history again and proposes a major. Close such a
+release PR unmerged.
+
+After a release is cut, `release-please.yml` moves the floating `v<major>` tag
+(e.g. `v2`) to it. A history rewrite must re-point that tag too.
 
 ## What our public interface is
 
