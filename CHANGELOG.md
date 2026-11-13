@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/roleme/workflows/compare/v2.7.0...v2.7.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **renovate:** commit dependency updates as fix(deps) ([#100](https://github.com/roleme/workflows/issues/100)) ([0a2911e](https://github.com/roleme/workflows/commit/0a2911e035b93cc18c8dbb2132e14becc9030527)), closes [#97](https://github.com/roleme/workflows/issues/97)
+
 ## [2.7.0](https://github.com/roleme/workflows/compare/v2.6.0...v2.7.0) (2026-10-28)
 
 
