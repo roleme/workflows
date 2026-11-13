@@ -41,6 +41,18 @@
       "automerge": true
     },
     {
+      "description": "GitHub Actions digest bumps and first-time pins automerge on green CI, same as patch and minor. A digest bump on a pinned action is the same tag re-pointed and a pin only adds the digest, so neither changes the version consumers asked for. Docker digests are left manual on purpose: the digest-pinned images are stateful (Immich's valkey and postgres).",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "automerge": true
+    },
+    {
       "description": "Our own shared reusables (roleme/workflows) \u2014 no soak, auto-merge non-major on green. We control this repo and it is released via release-please (patch/minor verified by its own CI before the tag is cut), so consumers should pick up new versions immediately and let their own required checks be the gate. Major bumps fall through to the rule below and stay manual.",
       "matchManagers": [
         "github-actions"
