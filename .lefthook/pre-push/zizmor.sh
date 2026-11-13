@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # renovate: datasource=pypi depName=zizmor
-ZIZMOR_VERSION=1.31.1
+ZIZMOR_VERSION=1.32.0
 
 format=()
 if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
