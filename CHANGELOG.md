@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.2](https://github.com/roleme/workflows/compare/v2.7.1...v2.7.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* **release:** create the floating major tag ([#104](https://github.com/roleme/workflows/issues/104)) ([a59a240](https://github.com/roleme/workflows/commit/a59a240932ba10a5bbb8e558c1c773fde299f60f))
+
 ## [2.7.1](https://github.com/roleme/workflows/compare/v2.7.0...v2.7.1) (2026-11-13)
 
 
