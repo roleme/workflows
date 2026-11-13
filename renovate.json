@@ -9,5 +9,13 @@
       "managerFilePatterns": ["/^\\.lefthook/.+\\.sh$/"],
       "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z_]+=(?<currentValue>\\S+)"]
     }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["!roleme/workflows"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
+      "groupName": "dependencies (non-major)",
+      "schedule": ["* 0-3 * * 1"]
+    }
   ]
 }
