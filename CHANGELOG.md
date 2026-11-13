@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.3](https://github.com/roleme/workflows/compare/v2.7.2...v2.7.3) (2026-11-13)
+
+
+### Bug Fixes
+
+* **preset:** automerge GitHub Actions digest bumps ([#107](https://github.com/roleme/workflows/issues/107)) ([226dfcc](https://github.com/roleme/workflows/commit/226dfcc801b82e6a0a2b93151ac36fc941a665e3))
+
 ## [2.7.2](https://github.com/roleme/workflows/compare/v2.7.1...v2.7.2) (2026-11-13)
 
 
