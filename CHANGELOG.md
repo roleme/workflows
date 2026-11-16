@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/roleme/workflows/compare/v2.11.0...v2.12.0) (2026-11-16)
+
+
+### Features
+
+* weekly build arg in docker publish ([#126](https://github.com/roleme/workflows/issues/126)) ([5144d7c](https://github.com/roleme/workflows/commit/5144d7c32cd8846f07519406628defebe1c9debf))
+
 ## [2.11.0](https://github.com/roleme/workflows/compare/v2.10.1...v2.11.0) (2026-11-16)
 
 
