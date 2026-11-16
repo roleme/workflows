@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.0](https://github.com/roleme/workflows/compare/v2.14.0...v2.15.0) (2026-11-16)
+
+
+### Features
+
+* Node 26 in validation and auto-merge ([#136](https://github.com/roleme/workflows/issues/136)) ([0c48da6](https://github.com/roleme/workflows/commit/0c48da6fcedeeec5e03c2df94b6400d36a84abab))
+
 ## [2.14.0](https://github.com/roleme/workflows/compare/v2.13.0...v2.14.0) (2026-11-16)
 
 
