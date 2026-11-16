@@ -17,6 +17,8 @@
 #         issues: write
 #         packages: read
 #       with:
+#         pip-audit: |
+#           requirements.txt
 #         govulncheck: true
 #         trivy-images: |
 #           ghcr.io/owner/repo:latest
@@ -34,6 +36,11 @@ on:
         required: false
         type: boolean
         default: true
+      pip-audit:
+        description: Newline-separated requirements files to audit with pip-audit, which resolves the full dependency tree including unpinned transitives
+        required: false
+        type: string
+        default: ""
       govulncheck:
         description: Run govulncheck on ./... (needs go.mod)
         required: false
@@ -61,6 +68,8 @@ permissions:
 env:
   # renovate: datasource=docker depName=ghcr.io/google/osv-scanner
   OSV_SCANNER_VERSION: v2.7.1
+  # renovate: datasource=pypi depName=pip-audit
+  PIP_AUDIT_VERSION: 2.10.1
   # renovate: datasource=go depName=golang.org/x/vuln
   GOVULNCHECK_VERSION: v1.9.0
   # renovate: datasource=pypi depName=zizmor
@@ -86,6 +95,41 @@ jobs:
           printf '%s\n' "$out"
           # exit 128 = no lockfiles or requirements files found: nothing to scan
           [ "$code" -ne 128 ] || code=0
+          delim="EOF_$(openssl rand -hex 8)"
+          {
+            echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
+            echo "report<<$delim"
+            printf '%s\n' "$out" | head -c 6000
+            echo
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+
+  pip-audit:
+    if: ${{ inputs.pip-audit != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      status: ${{ steps.scan.outputs.status }}
+      report: ${{ steps.scan.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+      - id: scan
+        env:
+          FILES: ${{ inputs.pip-audit }}
+        run: |
+          set +e
+          args=()
+          while IFS= read -r f; do
+            [ -n "$f" ] && args+=(-r "$f")
+          done <<< "$FILES"
+          out=$(uvx "pip-audit@${PIP_AUDIT_VERSION}" "${args[@]}" 2>&1)
+          code=$?
+          printf '%s\n' "$out"
           delim="EOF_$(openssl rand -hex 8)"
           {
             echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
@@ -203,7 +247,7 @@ jobs:
 
   report:
     if: ${{ always() }}
-    needs: [osv, govulncheck, trivy, zizmor]
+    needs: [osv, pip-audit, govulncheck, trivy, zizmor]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -217,6 +261,7 @@ jobs:
           script: |
             const titles = {
               osv: 'OSV-Scanner (dependencies)',
+              'pip-audit': 'pip-audit (Python, full dependency tree)',
               govulncheck: 'govulncheck (Go)',
               trivy: 'Trivy (container images)',
               zizmor: 'zizmor (GitHub Actions)',
