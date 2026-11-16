@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/roleme/workflows/compare/v2.12.0...v2.13.0) (2026-11-16)
+
+
+### Features
+
+* scan runs keep sections they did not scan ([#129](https://github.com/roleme/workflows/issues/129)) ([7a4fa94](https://github.com/roleme/workflows/commit/7a4fa940cba111ade5bab7faf1b2c71fd7a4fa74))
+
 ## [2.12.0](https://github.com/roleme/workflows/compare/v2.11.0...v2.12.0) (2026-11-16)
 
 
