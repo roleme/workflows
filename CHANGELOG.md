@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.1](https://github.com/roleme/workflows/compare/v2.10.0...v2.10.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* quiet scan output in the issue body ([#121](https://github.com/roleme/workflows/issues/121)) ([3935314](https://github.com/roleme/workflows/commit/3935314a842bdc874a7a3655a377f948826162f3))
+
 ## [2.10.0](https://github.com/roleme/workflows/compare/v2.9.0...v2.10.0) (2026-11-16)
 
 
