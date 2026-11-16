@@ -6,6 +6,7 @@
     "helpers:pinGitHubActionDigests"
   ],
   "minimumReleaseAge": "10 days",
+  "osvVulnerabilityAlerts": true,
   "rebaseWhen": "conflicted",
   "labels": [
     "dependencies",
