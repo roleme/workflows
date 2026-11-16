@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/roleme/workflows/compare/v2.9.0...v2.10.0) (2026-11-16)
+
+
+### Features
+
+* pip-audit in the third-party scan ([#119](https://github.com/roleme/workflows/issues/119)) ([7da0279](https://github.com/roleme/workflows/commit/7da027907ad16ace52b18b4d7a0c5e7dd60f5a15))
+
 ## [2.9.0](https://github.com/roleme/workflows/compare/v2.8.0...v2.9.0) (2026-11-16)
 
 
