@@ -26,6 +26,11 @@
 # The issue is created on the first finding, edited in place while findings
 # remain, and closed with a comment once every scan is clean. Scan jobs only
 # read the repo; only the report job can write issues.
+#
+# A run only replaces the sections of the scanners it ran and keeps the rest of
+# the issue as earlier runs left it, so a caller can also run one scanner right
+# after a build (osv: false, zizmor: false, trivy-images: <image>) without
+# wiping the weekly results.
 name: third-party scan (reusable)
 
 on:
@@ -298,17 +303,15 @@ jobs:
             const title = process.env.TITLE;
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
-            const sections = [];
-            let dirty = false;
+            const ran = {};
             for (const [id, label] of Object.entries(titles)) {
               const job = needs[id];
               if (!job || job.result === 'skipped') continue;
               const status = job.result === 'success' ? (job.outputs.status || 'failed (no result)') : `failed (job ${job.result})`;
-              if (status !== 'ok') dirty = true;
-              const report = status === 'ok' ? '' : `\n\n\`\`\`\`\n${(job.outputs.report || '').trim()}\n\`\`\`\`\n`;
-              sections.push(`## ${label}: ${status}${report}`);
+              const report = status === 'ok' ? '' : `\n\n\`\`\`\`\n${(job.outputs.report || '').trim()}\n\`\`\`\``;
+              ran[id] = `## ${label}: ${status}${report}`;
             }
-            if (sections.length === 0) return;
+            if (Object.keys(ran).length === 0) return;
 
             const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
@@ -318,12 +321,23 @@ jobs:
             });
             const existing = issues.find((i) => !i.pull_request && i.title === title);
 
-            if (dirty) {
+            // Sections this run did not scan stay as an earlier run left them.
+            const kept = {};
+            for (const chunk of (existing?.body || '').split(/^(?=## )/m)) {
+              const head = chunk.split('\n', 1)[0];
+              const id = Object.keys(titles).find((k) => head.startsWith(`## ${titles[k]}: `));
+              if (id) kept[id] = chunk.replace(/\n+Output is cut at[^\n]*\s*$/, '').trimEnd();
+            }
+            const merged = { ...kept, ...ran };
+            const ordered = Object.keys(titles).filter((id) => merged[id]).map((id) => merged[id]);
+            const isDirty = ordered.some((chunk) => chunk.split('\n', 1)[0].split(': ').pop() !== 'ok');
+
+            if (isDirty) {
               const body = [
-                `Scheduled scan of third-party code, run: ${runUrl}`,
+                `Latest scan run: ${runUrl}`,
                 `Updated: ${new Date().toISOString()}`,
                 '',
-                ...sections,
+                ordered.join('\n\n'),
                 '',
                 'Output is cut at 6000 characters per scanner; the full output is in the run log.',
               ].join('\n');
