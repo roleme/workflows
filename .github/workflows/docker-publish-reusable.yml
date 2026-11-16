@@ -111,7 +111,7 @@ jobs:
         # Same-repo composite action, referenced fully-qualified (a local
         # `./komodo-deploy` path would resolve against the CALLER's checkout, not
         # this repo). Pinned to the current release SHA.
-        uses: roleme/workflows/komodo-deploy@2eacf17e3467aa538be3fce2b7066649cb90d4f3 # v2.8.0
+        uses: roleme/workflows/komodo-deploy@398745c19b88f0a1678ac36f15dd3b8b891a0a68 # v2.10.0
         with:
           host: ${{ inputs.komodo-host }}
           stack: ${{ inputs.komodo-stack }}
