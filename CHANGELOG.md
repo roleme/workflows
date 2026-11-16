@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0](https://github.com/roleme/workflows/compare/v2.10.1...v2.11.0) (2026-11-16)
+
+
+### Features
+
+* trivy summary mode in the third-party scan ([#124](https://github.com/roleme/workflows/issues/124)) ([96f2c67](https://github.com/roleme/workflows/commit/96f2c676fa38b697493626c578bae823229861c6))
+
 ## [2.10.1](https://github.com/roleme/workflows/compare/v2.10.0...v2.10.1) (2026-11-16)
 
 
