@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.1](https://github.com/roleme/workflows/compare/v2.16.0...v2.16.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency aquasecurity/trivy to v0.76.2 ([#142](https://github.com/roleme/workflows/issues/142)) ([099bcbe](https://github.com/roleme/workflows/commit/099bcbe77f1aa4117fd75f1eda155ee5b3be1424))
+
 ## [2.16.0](https://github.com/roleme/workflows/compare/v2.15.0...v2.16.0) (2026-11-16)
 
 
