@@ -51,6 +51,11 @@ on:
         required: false
         type: string
         default: ""
+      trivy-summary:
+        description: Report one row of CRITICAL and HIGH counts per image that has findings, instead of the full Trivy tables. Use it for many images.
+        required: false
+        type: boolean
+        default: false
       zizmor:
         description: Audit workflows with zizmor, including its online checks for vulnerable actions
         required: false
@@ -188,6 +193,7 @@ jobs:
       - id: scan
         env:
           IMAGES: ${{ inputs.trivy-images }}
+          SUMMARY: ${{ inputs.trivy-summary }}
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ github.token }}
         run: |
@@ -196,8 +202,26 @@ jobs:
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin >/dev/null
           out=""
           code=0
+          scanned=0
+          flagged=0
           while IFS= read -r image; do
             [ -n "$image" ] || continue
+            scanned=$((scanned + 1))
+            if [ "$SUMMARY" = "true" ]; then
+              json=$(trivy image --quiet --ignore-unfixed --severity HIGH,CRITICAL --format json "$image" 2>/dev/null)
+              rc=$?
+              counts=$(jq -r '[.Results[]?.Vulnerabilities[]?.Severity] | "\(map(select(. == "CRITICAL")) | length) \(map(select(. == "HIGH")) | length)"' <<< "$json" 2>/dev/null)
+              if [ "$rc" -ne 0 ] || [ -z "$counts" ]; then
+                echo "scan error: $image"
+                out+="scan error  $image"$'\n'
+                flagged=$((flagged + 1)); code=1
+              elif [ "$counts" != "0 0" ]; then
+                echo "$counts  $image"
+                out+="$counts  $image"$'\n'
+                flagged=$((flagged + 1)); code=1
+              fi
+              continue
+            fi
             echo "::group::$image"
             res=$(trivy image --quiet --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 "$image" 2>&1)
             rc=$?
@@ -206,11 +230,14 @@ jobs:
             [ "$rc" -eq 0 ] || code=$rc
             out+="### $image"$'\n'"$res"$'\n\n'
           done <<< "$IMAGES"
+          if [ "$SUMMARY" = "true" ]; then
+            out="$flagged of $scanned images have fixable HIGH or CRITICAL findings (columns: critical high image)"$'\n\n'"$(printf '%s' "$out" | sort -rn)"
+          fi
           delim="EOF_$(openssl rand -hex 8)"
           {
             echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
             echo "report<<$delim"
-            printf '%s\n' "$out" | head -c 6000
+            printf '%s\n' "$out" | head -c 12000
             echo
             echo "$delim"
           } >> "$GITHUB_OUTPUT"
