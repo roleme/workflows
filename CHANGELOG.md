@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.4](https://github.com/roleme/workflows/compare/v2.7.3...v2.7.4) (2026-11-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependencies (non-major) ([#111](https://github.com/roleme/workflows/issues/111)) ([fbc45ea](https://github.com/roleme/workflows/commit/fbc45ea83a8b6b132c96ebc6566df7d9cce2e3f2))
+
 ## [2.7.3](https://github.com/roleme/workflows/compare/v2.7.2...v2.7.3) (2026-11-13)
 
 
