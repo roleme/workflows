@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/roleme/workflows/compare/v2.8.0...v2.9.0) (2026-11-16)
+
+
+### Features
+
+* osv-diff workflow and Renovate OSV alerts ([#116](https://github.com/roleme/workflows/issues/116)) ([7afa3f3](https://github.com/roleme/workflows/commit/7afa3f3349d2b6b310fdf2ee63d0440c81dc5e78))
+
 ## [2.8.0](https://github.com/roleme/workflows/compare/v2.7.4...v2.8.0) (2026-11-16)
 
 
