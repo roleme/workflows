@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.0](https://github.com/roleme/workflows/compare/v2.13.0...v2.14.0) (2026-11-16)
+
+
+### Features
+
+* comment when scan findings get worse ([#134](https://github.com/roleme/workflows/issues/134)) ([780ad61](https://github.com/roleme/workflows/commit/780ad61c276c46a073892d1fc484967c2900a640))
+
 ## [2.13.0](https://github.com/roleme/workflows/compare/v2.12.0...v2.13.0) (2026-11-16)
 
 
