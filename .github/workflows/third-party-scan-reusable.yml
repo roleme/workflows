@@ -31,6 +31,10 @@
 # the issue as earlier runs left it, so a caller can also run one scanner right
 # after a build (osv: false, zizmor: false, trivy-images: <image>) without
 # wiping the weekly results.
+#
+# GitHub does not notify on an edited issue, so when a scanner's result is worse
+# than the section it replaces (newly failing, or more critical or high findings)
+# the report job also posts a comment listing what got worse.
 name: third-party scan (reusable)
 
 on:
@@ -332,6 +336,46 @@ jobs:
             const ordered = Object.keys(titles).filter((id) => merged[id]).map((id) => merged[id]);
             const isDirty = ordered.some((chunk) => chunk.split('\n', 1)[0].split(': ').pop() !== 'ok');
 
+            const statusOf = (chunk) => (chunk ? chunk.split('\n', 1)[0].split(': ').pop() : '');
+            const summarize = (id, chunk) => {
+              const t = chunk || '';
+              const out = { c: 0, h: 0, n: 0 };
+              let m;
+              if (id === 'osv') {
+                if ((m = t.match(/\((\d+) Critical, (\d+) High/))) { out.c = Number(m[1]); out.h = Number(m[2]); }
+                if ((m = t.match(/by (\d+) known vulnerabilit/))) out.n = Number(m[1]);
+              } else if (id === 'trivy') {
+                if ((m = t.match(/(\d+) of \d+ images have/))) out.n = Number(m[1]);
+                for (const r of t.matchAll(/^(\d+) (\d+) {2}\S/gm)) { out.c += Number(r[1]); out.h += Number(r[2]); }
+                for (const r of t.matchAll(/Total: \d+ \(HIGH: (\d+), CRITICAL: (\d+)\)/g)) { out.h += Number(r[1]); out.c += Number(r[2]); }
+              } else if (id === 'govulncheck') {
+                if ((m = t.match(/affected by (\d+) vulnerabilit/))) out.n = Number(m[1]);
+              } else if (id === 'pip-audit') {
+                if ((m = t.match(/Found (\d+) known vulnerabilit/))) out.n = Number(m[1]);
+              }
+              return out;
+            };
+            const describe = (s) => {
+              const parts = [s.c ? `${s.c} critical` : '', s.h ? `${s.h} high` : '', s.n ? `${s.n} total` : ''].filter(Boolean);
+              return parts.length ? parts.join(', ') : 'findings';
+            };
+            // What got worse between the previous section (or none) and this run's.
+            const worsened = (id, label, before, after) => {
+              if (statusOf(after) === 'ok') return null;
+              const now = summarize(id, after);
+              if (!before || statusOf(before) === 'ok') return `${label}: new findings (${describe(now)})`;
+              const was = summarize(id, before);
+              const isWorse = now.c > was.c || (now.c === was.c && now.h > was.h) || now.n > was.n;
+              return isWorse ? `${label}: ${describe(was)} -> ${describe(now)}` : null;
+            };
+
+            // GitHub does not notify on an edited issue, so a worse result also gets a comment.
+            const reasons = [];
+            for (const id of Object.keys(ran)) {
+              const reason = worsened(id, titles[id], kept[id], ran[id]);
+              if (reason) reasons.push(reason);
+            }
+
             if (isDirty) {
               const body = [
                 `Latest scan run: ${runUrl}`,
@@ -343,6 +387,13 @@ jobs:
               ].join('\n');
               if (existing) {
                 await github.rest.issues.update({ ...context.repo, issue_number: existing.number, body });
+                if (reasons.length > 0) {
+                  await github.rest.issues.createComment({
+                    ...context.repo,
+                    issue_number: existing.number,
+                    body: `Findings got worse in ${runUrl}:\n\n${reasons.map((r) => `- ${r}`).join('\n')}`,
+                  });
+                }
               } else {
                 await github.rest.issues.create({ ...context.repo, title, body });
               }
