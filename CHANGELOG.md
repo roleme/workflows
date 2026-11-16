@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.0](https://github.com/roleme/workflows/compare/v2.15.0...v2.16.0) (2026-11-16)
+
+
+### Features
+
+* no Renovate schedule in the grouped preset ([#139](https://github.com/roleme/workflows/issues/139)) ([53b48c1](https://github.com/roleme/workflows/commit/53b48c140883eb526f30820b0fd60420a210378f))
+
 ## [2.15.0](https://github.com/roleme/workflows/compare/v2.14.0...v2.15.0) (2026-11-16)
 
 
