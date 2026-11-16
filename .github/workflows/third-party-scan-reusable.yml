@@ -89,6 +89,7 @@ jobs:
           persist-credentials: false
       - id: scan
         run: |
+          docker pull --quiet "ghcr.io/google/osv-scanner:${OSV_SCANNER_VERSION}" >/dev/null
           set +e
           out=$(docker run --rm -v "$PWD:/src" -w /src "ghcr.io/google/osv-scanner:${OSV_SCANNER_VERSION}" scan source --recursive . 2>&1)
           code=$?
@@ -198,7 +199,7 @@ jobs:
           while IFS= read -r image; do
             [ -n "$image" ] || continue
             echo "::group::$image"
-            res=$(trivy image --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 "$image" 2>&1)
+            res=$(trivy image --quiet --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 "$image" 2>&1)
             rc=$?
             printf '%s\n' "$res"
             echo "::endgroup::"
