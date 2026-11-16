@@ -9,6 +9,12 @@
       "customType": "regex",
       "managerFilePatterns": ["/^\\.lefthook/.+\\.sh$/"],
       "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z_]+=(?<currentValue>\\S+)"]
+    },
+    {
+      "description": "Scanner versions pinned in the env block of the third-party scan workflow.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/third-party-scan-reusable\\.yml$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s+[A-Za-z_]+: (?<currentValue>\\S+)"]
     }
   ],
   "packageRules": [

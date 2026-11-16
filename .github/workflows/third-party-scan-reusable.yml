@@ -1,0 +1,268 @@
+# Reusable scheduled scan of third-party code: dependency advisories, container
+# image CVEs, Go stdlib/module vulnerabilities and vulnerable GitHub Actions.
+# Their results change as advisories are published, so they must not gate PRs;
+# this workflow records them in ONE issue per repo instead. Callers add a thin
+# weekly wrapper:
+#
+#   on:
+#     schedule:
+#       - cron: "0 5 * * 1"
+#     workflow_dispatch: {}
+#   permissions: {}
+#   jobs:
+#     scan:
+#       uses: roleme/workflows/.github/workflows/third-party-scan-reusable.yml@<sha>
+#       permissions:
+#         contents: read
+#         issues: write
+#         packages: read
+#       with:
+#         govulncheck: true
+#         trivy-images: |
+#           ghcr.io/owner/repo:latest
+#
+# The issue is created on the first finding, edited in place while findings
+# remain, and closed with a comment once every scan is clean. Scan jobs only
+# read the repo; only the report job can write issues.
+name: third-party scan (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      osv:
+        description: Scan lockfiles and requirements files with OSV-Scanner
+        required: false
+        type: boolean
+        default: true
+      govulncheck:
+        description: Run govulncheck on ./... (needs go.mod)
+        required: false
+        type: boolean
+        default: false
+      trivy-images:
+        description: Newline-separated container images to scan with Trivy
+        required: false
+        type: string
+        default: ""
+      zizmor:
+        description: Audit workflows with zizmor, including its online checks for vulnerable actions
+        required: false
+        type: boolean
+        default: true
+      issue-title:
+        description: Title of the single tracking issue
+        required: false
+        type: string
+        default: Third-party security findings
+
+permissions:
+  contents: read
+
+env:
+  # renovate: datasource=docker depName=ghcr.io/google/osv-scanner
+  OSV_SCANNER_VERSION: v2.7.1
+  # renovate: datasource=go depName=golang.org/x/vuln
+  GOVULNCHECK_VERSION: v1.9.0
+  # renovate: datasource=pypi depName=zizmor
+  ZIZMOR_VERSION: 1.32.0
+
+jobs:
+  osv:
+    if: ${{ inputs.osv }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      status: ${{ steps.scan.outputs.status }}
+      report: ${{ steps.scan.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: scan
+        run: |
+          set +e
+          out=$(docker run --rm -v "$PWD:/src" -w /src "ghcr.io/google/osv-scanner:${OSV_SCANNER_VERSION}" scan source --recursive . 2>&1)
+          code=$?
+          printf '%s\n' "$out"
+          # exit 128 = no lockfiles or requirements files found: nothing to scan
+          [ "$code" -ne 128 ] || code=0
+          delim="EOF_$(openssl rand -hex 8)"
+          {
+            echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
+            echo "report<<$delim"
+            printf '%s\n' "$out" | head -c 6000
+            echo
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+
+  govulncheck:
+    if: ${{ inputs.govulncheck }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      status: ${{ steps.scan.outputs.status }}
+      report: ${{ steps.scan.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - id: scan
+        run: |
+          set +e
+          out=$(go run "golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}" ./... 2>&1)
+          code=$?
+          printf '%s\n' "$out"
+          delim="EOF_$(openssl rand -hex 8)"
+          {
+            echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
+            echo "report<<$delim"
+            printf '%s\n' "$out" | head -c 6000
+            echo
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+
+  trivy:
+    if: ${{ inputs.trivy-images != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      status: ${{ steps.scan.outputs.status }}
+      report: ${{ steps.scan.outputs.report }}
+    steps:
+      - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          # renovate: datasource=github-releases depName=aquasecurity/trivy
+          version: v0.76.1
+      - id: scan
+        env:
+          IMAGES: ${{ inputs.trivy-images }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          # Credentials go to ghcr.io only, never to other registries.
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin >/dev/null
+          out=""
+          code=0
+          while IFS= read -r image; do
+            [ -n "$image" ] || continue
+            echo "::group::$image"
+            res=$(trivy image --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 "$image" 2>&1)
+            rc=$?
+            printf '%s\n' "$res"
+            echo "::endgroup::"
+            [ "$rc" -eq 0 ] || code=$rc
+            out+="### $image"$'\n'"$res"$'\n\n'
+          done <<< "$IMAGES"
+          delim="EOF_$(openssl rand -hex 8)"
+          {
+            echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
+            echo "report<<$delim"
+            printf '%s\n' "$out" | head -c 6000
+            echo
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+
+  zizmor:
+    if: ${{ inputs.zizmor }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      status: ${{ steps.scan.outputs.status }}
+      report: ${{ steps.scan.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+      - id: scan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          out=$(uvx "zizmor@${ZIZMOR_VERSION}" . 2>&1)
+          code=$?
+          printf '%s\n' "$out"
+          delim="EOF_$(openssl rand -hex 8)"
+          {
+            echo "status=$([ "$code" -eq 0 ] && echo ok || echo "failed (exit $code)")"
+            echo "report<<$delim"
+            printf '%s\n' "$out" | head -c 6000
+            echo
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+
+  report:
+    if: ${{ always() }}
+    needs: [osv, govulncheck, trivy, zizmor]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          TITLE: ${{ inputs.issue-title }}
+        with:
+          script: |
+            const titles = {
+              osv: 'OSV-Scanner (dependencies)',
+              govulncheck: 'govulncheck (Go)',
+              trivy: 'Trivy (container images)',
+              zizmor: 'zizmor (GitHub Actions)',
+            };
+            const needs = JSON.parse(process.env.NEEDS);
+            const title = process.env.TITLE;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            const sections = [];
+            let dirty = false;
+            for (const [id, label] of Object.entries(titles)) {
+              const job = needs[id];
+              if (!job || job.result === 'skipped') continue;
+              const status = job.result === 'success' ? (job.outputs.status || 'failed (no result)') : `failed (job ${job.result})`;
+              if (status !== 'ok') dirty = true;
+              const report = status === 'ok' ? '' : `\n\n\`\`\`\`\n${(job.outputs.report || '').trim()}\n\`\`\`\`\n`;
+              sections.push(`## ${label}: ${status}${report}`);
+            }
+            if (sections.length === 0) return;
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const existing = issues.find((i) => !i.pull_request && i.title === title);
+
+            if (dirty) {
+              const body = [
+                `Scheduled scan of third-party code, run: ${runUrl}`,
+                `Updated: ${new Date().toISOString()}`,
+                '',
+                ...sections,
+                '',
+                'Output is cut at 6000 characters per scanner; the full output is in the run log.',
+              ].join('\n');
+              if (existing) {
+                await github.rest.issues.update({ ...context.repo, issue_number: existing.number, body });
+              } else {
+                await github.rest.issues.create({ ...context.repo, title, body });
+              }
+            } else if (existing) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: existing.number,
+                body: `All scans are clean in ${runUrl}. Closing.`,
+              });
+              await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'closed', state_reason: 'completed' });
+            }
