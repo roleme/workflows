@@ -9,26 +9,22 @@
       "matchCategories": ["ci"],
       "matchDepNames": ["!roleme/workflows"],
       "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "ci (non-major)",
-      "schedule": ["* 0-3 * * 1"]
+      "groupName": "ci (non-major)"
     },
     {
       "matchCategories": ["docker"],
       "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "docker (non-major)",
-      "schedule": ["* 0-3 * * 1"]
+      "groupName": "docker (non-major)"
     },
     {
       "matchCategories": ["python"],
       "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "python (non-major)",
-      "schedule": ["* 0-3 * * 1"]
+      "groupName": "python (non-major)"
     },
     {
       "matchCategories": ["js"],
       "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "js (non-major)",
-      "schedule": ["* 0-3 * * 1"]
+      "groupName": "js (non-major)"
     }
   ]
 }
