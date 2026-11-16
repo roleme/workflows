@@ -114,6 +114,7 @@ jobs:
           set +e
           out=$(go run "golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION}" ./... 2>&1)
           code=$?
+          out=$(printf '%s\n' "$out" | grep -v '^go: ' | awk '/^Vulnerability #/ {n=0} /^ +#[0-9]+:/ {n++; if (n>2) next} {print}')
           printf '%s\n' "$out"
           delim="EOF_$(openssl rand -hex 8)"
           {
