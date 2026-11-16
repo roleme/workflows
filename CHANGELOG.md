@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/roleme/workflows/compare/v2.7.4...v2.8.0) (2026-11-16)
+
+
+### Features
+
+* third-party scan reusable workflow ([#114](https://github.com/roleme/workflows/issues/114)) ([8bb3d53](https://github.com/roleme/workflows/commit/8bb3d5362658d91462d10769186589cada55e38b))
+
 ## [2.7.4](https://github.com/roleme/workflows/compare/v2.7.3...v2.7.4) (2026-11-16)
 
 
