@@ -21,8 +21,7 @@
     {
       "matchDepNames": ["!roleme/workflows"],
       "matchUpdateTypes": ["patch", "minor", "digest"],
-      "groupName": "dependencies (non-major)",
-      "schedule": ["* 0-3 * * 1"]
+      "groupName": "dependencies (non-major)"
     }
   ]
 }
