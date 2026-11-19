@@ -105,17 +105,31 @@ jobs:
         id: week
         run: echo "value=$(date -u +%G-W%V)" >>"$GITHUB_OUTPUT"
 
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
           build-args: BUILD_WEEK=${{ steps.week.outputs.value }}
-          push: true
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Scan image for secrets
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ inputs.image }}:latest
+          scanners: secret
+          exit-code: "1"
+          format: table
+
+      - name: Push
+        env:
+          IMAGE: ${{ inputs.image }}
+        run: docker push --all-tags "$IMAGE"
 
       - name: Trigger Komodo deploy
         # Same-repo composite action, referenced fully-qualified (a local
