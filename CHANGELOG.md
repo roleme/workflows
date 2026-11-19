@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.0](https://github.com/roleme/workflows/compare/v2.16.1...v2.17.0) (2026-11-19)
+
+
+### Features
+
+* secret-scan images before push in docker-publish ([#146](https://github.com/roleme/workflows/issues/146)) ([08e0152](https://github.com/roleme/workflows/commit/08e01520f84a2031c77953eb3ec980168bd845ea))
+
 ## [2.16.1](https://github.com/roleme/workflows/compare/v2.16.0...v2.16.1) (2026-11-16)
 
 
