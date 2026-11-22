@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.1](https://github.com/roleme/workflows/compare/v2.17.0...v2.17.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ruff to v0.17.5 ([#149](https://github.com/roleme/workflows/issues/149)) ([0f61e16](https://github.com/roleme/workflows/commit/0f61e1668a2b77cae3d2b8e92a8b4e12e56d1a56))
+
 ## [2.17.0](https://github.com/roleme/workflows/compare/v2.16.1...v2.17.0) (2026-11-19)
 
 
