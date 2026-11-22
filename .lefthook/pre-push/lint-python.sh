@@ -2,6 +2,6 @@
 set -euo pipefail
 
 # renovate: datasource=pypi depName=ruff
-RUFF_VERSION=0.17.4
+RUFF_VERSION=0.17.5
 
 uvx "ruff@${RUFF_VERSION}" check "$@"
