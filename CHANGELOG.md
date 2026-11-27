@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.2](https://github.com/roleme/workflows/compare/v2.17.1...v2.17.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **deps:** update actions/setup-go action to v7.1.0 ([#152](https://github.com/roleme/workflows/issues/152)) ([9123175](https://github.com/roleme/workflows/commit/9123175aa087effa1a60e43d0084c43c4c3d1c08))
+
 ## [2.17.1](https://github.com/roleme/workflows/compare/v2.17.0...v2.17.1) (2026-11-22)
 
 
