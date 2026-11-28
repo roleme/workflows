@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.3](https://github.com/roleme/workflows/compare/v2.17.2...v2.17.3) (2026-11-28)
+
+
+### Bug Fixes
+
+* **deps:** update module golang.org/x/vuln to v1.10.0 ([#155](https://github.com/roleme/workflows/issues/155)) ([adb5613](https://github.com/roleme/workflows/commit/adb5613874b6e333340baf6eaa95e7a36dff2929))
+
 ## [2.17.2](https://github.com/roleme/workflows/compare/v2.17.1...v2.17.2) (2026-11-27)
 
 
